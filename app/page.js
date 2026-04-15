@@ -63,10 +63,6 @@ export default async function Home() {
       {/* Client component handles filter dropdowns + card rendering */}
       <CompendiumClient birds={birds} />
 
-      {/* Footer */}
-      <footer style={styles.footer}>
-        <a href="/log" style={styles.logLink}>+ Log a sighting</a>
-      </footer>
     </main>
   );
 }
@@ -96,19 +92,5 @@ const styles = {
     marginTop: '0.25rem',
     color: '#52796f',
     fontSize: '0.95rem',
-  },
-  footer: {
-    marginTop: '3rem',
-    textAlign: 'center',
-  },
-  logLink: {
-    display: 'inline-block',
-    padding: '0.6rem 1.4rem',
-    background: '#2d6a4f',
-    color: '#fff',
-    borderRadius: '6px',
-    fontFamily: 'Arial, sans-serif',
-    fontSize: '0.9rem',
-    textDecoration: 'none',
   },
 };
