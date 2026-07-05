@@ -212,12 +212,12 @@ const styles = {
     background: 'none',
     border: '1px solid #d1d5db',
     borderRadius: '6px',
-    color: '#6b7280',
+    color: '#6B6B6B',
     cursor: 'pointer',
   },
   filterCount: {
     fontSize: '0.85rem',
-    color: '#52796f',
+    color: '#6B6B6B',
     marginBottom: '0.75rem',
   },
   grid: {
@@ -295,7 +295,7 @@ const styles = {
     lineHeight: 1.5,
   },
   empty: {
-    color: '#6b7280',
+    color: '#6B6B6B',
     textAlign: 'center',
     marginTop: '3rem',
   },

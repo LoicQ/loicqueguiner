@@ -290,16 +290,16 @@ const styles = {
   },
   title: {
     fontSize: '2rem',
-    color: '#1b4332',
+    color: '#1A1A1A',
     margin: 0,
   },
   subtitle: {
     marginTop: '0.25rem',
-    color: '#52796f',
+    color: '#6B6B6B',
     fontSize: '0.95rem',
   },
   empty: {
-    color: '#6b7280',
+    color: '#6B6B6B',
     textAlign: 'center',
     marginTop: '3rem',
   },
