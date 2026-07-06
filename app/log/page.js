@@ -16,7 +16,16 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+import { supabase } from '@/lib/supabase';
+
+// Leaflet touches `window` at import time, so the map must load client-side
+// only — never during SSR.
+const LocationPicker = dynamic(() => import('./LocationPicker'), {
+  ssr: false,
+  loading: () => <div style={styles.mapLoading}>Loading map…</div>,
+});
 
 // ---------------------------------------------------------------------------
 // Password gate
@@ -102,6 +111,8 @@ const EMPTY_FORM = {
   category: '',
   rarity: '',
   location: '',
+  lat: null,
+  lng: null,
   date_first_seen: new Date().toISOString().split('T')[0], // default to today
   notes: '',
 };
@@ -110,6 +121,63 @@ function SightingForm({ password }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [status, setStatus] = useState('idle'); // 'idle' | 'saving' | 'success' | 'error'
   const [errorMsg, setErrorMsg] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
+  // ---- Existing sightings (edit mode) ------------------------------------
+  const [sightings, setSightings] = useState([]);
+  const [sightingsStatus, setSightingsStatus] = useState('idle'); // 'idle' | 'loading' | 'loaded' | 'error'
+  const [editingId, setEditingId] = useState(null); // null = creating a new sighting
+
+  async function fetchSightings() {
+    setSightingsStatus('loading');
+    const { data, error } = await supabase
+      .from('birds')
+      .select('*')
+      .order('date_first_seen', { ascending: false });
+
+    if (error) {
+      console.error('[fetchSightings]', error.message);
+      setSightingsStatus('error');
+      return;
+    }
+
+    setSightings(data ?? []);
+    setSightingsStatus('loaded');
+  }
+
+  useEffect(() => {
+    // Load the existing-sightings list once on mount for the edit picker below.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchSightings();
+  }, []);
+
+  function startEdit(bird) {
+    setForm({
+      common_name: bird.common_name ?? '',
+      scientific_name: bird.scientific_name ?? '',
+      family: bird.family ?? '',
+      category: bird.category ?? '',
+      rarity: bird.rarity ?? '',
+      location: bird.location ?? '',
+      lat: bird.lat ?? null,
+      lng: bird.lng ?? null,
+      date_first_seen: bird.date_first_seen ?? '',
+      notes: bird.notes ?? '',
+    });
+    setEditingId(bird.id);
+    setStatus('idle');
+    setErrorMsg('');
+    setLookupStatus('idle');
+    setLookupResult(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function cancelEdit() {
+    setForm(EMPTY_FORM);
+    setEditingId(null);
+    setStatus('idle');
+    setErrorMsg('');
+  }
 
   // ---- AI lookup state ---------------------------------------------------
   // lookupStatus: 'idle' | 'loading' | 'ready' | 'error'
@@ -174,24 +242,36 @@ function SightingForm({ password }) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
+  function handleLocationPick(lat, lng) {
+    setForm((prev) => ({ ...prev, lat, lng }));
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setStatus('saving');
     setErrorMsg('');
 
+    const isEditing = Boolean(editingId);
+    const payload = isEditing
+      ? { action: 'update', password, id: editingId, bird: form }
+      : { action: 'add', password, bird: form };
+
     try {
       const res = await fetch('/api/log', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'add', password, bird: form }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
 
       if (data.ok) {
         setStatus('success');
+        setSuccessMessage(isEditing ? 'Sighting updated!' : 'Sighting saved! Add another below.');
         // Reset form for the next sighting, keeping today's date.
         setForm(EMPTY_FORM);
+        setEditingId(null);
+        fetchSightings();
       } else {
         setStatus('error');
         setErrorMsg(data.error ?? 'Unknown error from server.');
@@ -205,12 +285,53 @@ function SightingForm({ password }) {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>New Sighting</h1>
+      <h1 style={styles.title}>{editingId ? 'Edit Sighting' : 'New Sighting'}</h1>
       <a href="/" style={styles.backLink}>← Compendium</a>
+
+      <section style={styles.sightingsSection}>
+        <h2 style={styles.sightingsHeading}>Existing Sightings</h2>
+        {sightingsStatus === 'loading' && (
+          <p style={styles.sightingsHint}>Loading…</p>
+        )}
+        {sightingsStatus === 'error' && (
+          <p style={styles.lookupErrorMsg}>⚠ Could not load existing sightings.</p>
+        )}
+        {sightingsStatus === 'loaded' && sightings.length === 0 && (
+          <p style={styles.sightingsHint}>No sightings yet.</p>
+        )}
+        {sightings.length > 0 && (
+          <ul style={styles.sightingsList}>
+            {sightings.map((bird) => (
+              <li
+                key={bird.id}
+                style={{
+                  ...styles.sightingRow,
+                  ...(bird.id === editingId ? styles.sightingRowActive : {}),
+                }}
+              >
+                <div style={styles.sightingInfo}>
+                  <span style={styles.sightingName}>{bird.common_name}</span>
+                  <span style={styles.sightingMeta}>
+                    {bird.date_first_seen ?? '—'}
+                    {bird.location ? ` · ${bird.location}` : ''}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => startEdit(bird)}
+                  style={styles.editButton}
+                >
+                  Edit
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       {status === 'success' && (
         <div style={styles.successBanner}>
-          Sighting saved! Add another below.
+          {successMessage}
         </div>
       )}
 
@@ -362,6 +483,16 @@ function SightingForm({ password }) {
           placeholder="e.g. Central Park, NY"
         />
 
+        <label style={styles.label}>Pin location on map</label>
+        <LocationPicker
+          key={editingId ?? 'new'}
+          lat={form.lat}
+          lng={form.lng}
+          onChange={handleLocationPick}
+        />
+        <input type="hidden" name="lat" value={form.lat ?? ''} readOnly />
+        <input type="hidden" name="lng" value={form.lng ?? ''} readOnly />
+
         <label style={styles.label} htmlFor="notes">
           Notes
         </label>
@@ -379,13 +510,20 @@ function SightingForm({ password }) {
           <p style={styles.error}>{errorMsg}</p>
         )}
 
-        <button
-          type="submit"
-          style={styles.button}
-          disabled={status === 'saving'}
-        >
-          {status === 'saving' ? 'Saving…' : 'Save Sighting'}
-        </button>
+        <div style={styles.formActions}>
+          <button
+            type="submit"
+            style={{ ...styles.button, marginTop: 0 }}
+            disabled={status === 'saving'}
+          >
+            {status === 'saving' ? 'Saving…' : editingId ? 'Save Changes' : 'Save Sighting'}
+          </button>
+          {editingId && (
+            <button type="button" onClick={cancelEdit} style={styles.cancelEditButton}>
+              Cancel edit
+            </button>
+          )}
+        </div>
       </form>
     </div>
   );
@@ -465,6 +603,93 @@ const styles = {
   textarea: {
     resize: 'vertical',
     fontFamily: 'inherit',
+  },
+  mapLoading: {
+    height: '220px',
+    width: '100%',
+    borderRadius: '6px',
+    border: '1px solid #d1d5db',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#6b7280',
+    fontSize: '0.85rem',
+    background: '#f9fafb',
+  },
+
+  // -- Existing sightings / edit mode --------------------------------------
+  sightingsSection: {
+    marginBottom: '1.5rem',
+  },
+  sightingsHeading: {
+    fontSize: '1rem',
+    color: '#1b4332',
+    marginBottom: '0.5rem',
+  },
+  sightingsHint: {
+    fontSize: '0.85rem',
+    color: '#6b7280',
+  },
+  sightingsList: {
+    listStyle: 'none',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.35rem',
+    maxHeight: '260px',
+    overflowY: 'auto',
+    border: '1px solid #d1d5db',
+    borderRadius: '6px',
+    padding: '0.5rem',
+  },
+  sightingRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.35rem 0.5rem',
+    borderRadius: '5px',
+  },
+  sightingRowActive: {
+    background: '#eff6ff',
+  },
+  sightingInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    minWidth: 0,
+  },
+  sightingName: {
+    fontWeight: 'bold',
+    color: '#1b4332',
+    fontSize: '0.9rem',
+  },
+  sightingMeta: {
+    color: '#6b7280',
+    fontSize: '0.8rem',
+  },
+  editButton: {
+    flexShrink: 0,
+    padding: '0.3rem 0.75rem',
+    fontSize: '0.8rem',
+    background: '#1d4ed8',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+  },
+  formActions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    marginTop: '1.25rem',
+  },
+  cancelEditButton: {
+    padding: '0.75rem 1rem',
+    fontSize: '0.9rem',
+    background: 'none',
+    color: '#6b7280',
+    border: '1px solid #d1d5db',
+    borderRadius: '6px',
+    cursor: 'pointer',
   },
   button: {
     marginTop: '1.25rem',

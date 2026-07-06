@@ -10,6 +10,7 @@ const NAV_SECTIONS = [
     links: [
       { href: '/dashboard', label: 'Dashboard' },
       { href: '/', label: 'Compendium' },
+      { href: '/map', label: 'Map' },
     ],
   },
 ];
