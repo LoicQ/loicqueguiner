@@ -6,6 +6,7 @@
 // only, see the dynamic import below) plus a legend.
 //
 // Privacy tiers:
+//   - sensitive flag true                    -> omitted entirely, regardless of rarity
 //   - Common / Uncommon / unspecified rarity -> precise pin
 //   - Scarce / Rare                          -> approximate ~8km circle
 //   - Very Rare / Mega                       -> omitted entirely
@@ -35,8 +36,12 @@ function classifyRarity(rarity) {
 }
 
 export default function MapView({ birds }) {
-  const plotted = birds
-    .filter((b) => b.lat != null && b.lng != null)
+  const mappable = birds.filter((b) => b.lat != null && b.lng != null);
+
+  const sensitiveCount = mappable.filter((b) => b.sensitive).length;
+
+  const plotted = mappable
+    .filter((b) => !b.sensitive)
     .map((b) => ({ ...b, tier: classifyRarity(b.rarity) }))
     .filter((b) => b.tier !== 'omitted');
 
@@ -59,6 +64,13 @@ export default function MapView({ birds }) {
         <SightingsMap pins={pins} circles={circles} center={center} zoom={zoom} />
       </div>
 
+      {sensitiveCount > 0 && (
+        <p style={styles.sensitiveNote}>
+          {sensitiveCount} sensitive sighting{sensitiveCount !== 1 ? 's' : ''} not
+          shown, to protect vulnerable species
+        </p>
+      )}
+
       <div style={styles.legend}>
         <p style={styles.legendTitle}>Legend</p>
         <div style={styles.legendRow}>
@@ -72,6 +84,10 @@ export default function MapView({ birds }) {
         <div style={styles.legendRow}>
           <span style={styles.legendHiddenSwatch}>—</span>
           <span>Very Rare / Mega — not shown, to protect the sighting</span>
+        </div>
+        <div style={styles.legendRow}>
+          <span style={styles.legendHiddenSwatch}>🔒</span>
+          <span>Marked sensitive — never shown, regardless of rarity</span>
         </div>
       </div>
     </>
@@ -96,6 +112,14 @@ const styles = {
     color: '#6b7280',
     fontSize: '0.9rem',
     background: '#f9fafb',
+    fontFamily: 'Arial, sans-serif',
+  },
+  sensitiveNote: {
+    marginTop: '-0.75rem',
+    marginBottom: '1.25rem',
+    fontSize: '0.85rem',
+    color: '#6b7280',
+    fontStyle: 'italic',
     fontFamily: 'Arial, sans-serif',
   },
   legend: {

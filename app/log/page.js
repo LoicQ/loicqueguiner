@@ -115,6 +115,7 @@ const EMPTY_FORM = {
   lng: null,
   date_first_seen: new Date().toISOString().split('T')[0], // default to today
   notes: '',
+  sensitive: false,
 };
 
 function SightingForm({ password }) {
@@ -163,6 +164,7 @@ function SightingForm({ password }) {
       lng: bird.lng ?? null,
       date_first_seen: bird.date_first_seen ?? '',
       notes: bird.notes ?? '',
+      sensitive: bird.sensitive ?? false,
     });
     setEditingId(bird.id);
     setStatus('idle');
@@ -244,6 +246,10 @@ function SightingForm({ password }) {
 
   function handleLocationPick(lat, lng) {
     setForm((prev) => ({ ...prev, lat, lng }));
+  }
+
+  function handleSensitiveChange(e) {
+    setForm((prev) => ({ ...prev, sensitive: e.target.checked }));
   }
 
   async function handleSubmit(e) {
@@ -493,6 +499,24 @@ function SightingForm({ password }) {
         <input type="hidden" name="lat" value={form.lat ?? ''} readOnly />
         <input type="hidden" name="lng" value={form.lng ?? ''} readOnly />
 
+        <div style={styles.checkboxRow}>
+          <input
+            id="sensitive"
+            name="sensitive"
+            type="checkbox"
+            checked={form.sensitive}
+            onChange={handleSensitiveChange}
+            style={styles.checkbox}
+          />
+          <label style={styles.checkboxLabel} htmlFor="sensitive">
+            Sensitive location — omit from public map
+          </label>
+        </div>
+        <p style={styles.checkboxHelp}>
+          Use for owls, raptor nests, or any species/site vulnerable to
+          disturbance if the location is shared.
+        </p>
+
         <label style={styles.label} htmlFor="notes">
           Notes
         </label>
@@ -603,6 +627,30 @@ const styles = {
   textarea: {
     resize: 'vertical',
     fontFamily: 'inherit',
+  },
+  checkboxRow: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '0.5rem',
+    marginTop: '1rem',
+  },
+  checkbox: {
+    marginTop: '0.2rem',
+    flexShrink: 0,
+    width: '16px',
+    height: '16px',
+  },
+  checkboxLabel: {
+    fontSize: '0.85rem',
+    fontWeight: 'bold',
+    color: '#374151',
+  },
+  checkboxHelp: {
+    marginTop: '0.25rem',
+    marginLeft: '1.5rem',
+    fontSize: '0.78rem',
+    color: '#6b7280',
+    lineHeight: 1.4,
   },
   mapLoading: {
     height: '220px',

@@ -30,6 +30,7 @@ function buildBirdFields(bird) {
     lng: bird.lng === '' || bird.lng == null ? null : Number(bird.lng),
     date_first_seen: bird.date_first_seen || null, // actual column name in DB
     notes: bird.notes?.trim() || null,
+    sensitive: bird.sensitive === true,
   };
 }
 

@@ -74,8 +74,10 @@ function BirdCard({ bird }) {
         {bird.date_first_seen && (
           <span style={styles.metaItem}>📅 {formatDate(bird.date_first_seen)}</span>
         )}
-        {bird.location && (
-          <span style={styles.metaItem}>📍 {bird.location}</span>
+        {(bird.sensitive || bird.location) && (
+          <span style={styles.metaItem}>
+            📍 {bird.sensitive ? 'Location undisclosed' : bird.location}
+          </span>
         )}
       </div>
 

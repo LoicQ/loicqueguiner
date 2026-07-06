@@ -262,7 +262,7 @@ export default async function DashboardPage() {
               <span style={styles.recentName}>{b.common_name}</span>
               <span style={styles.recentMeta}>
                 {formatDate(b.date_first_seen)}
-                {b.location ? ` · ${b.location}` : ''}
+                {b.sensitive ? ' · Location undisclosed' : (b.location ? ` · ${b.location}` : '')}
               </span>
             </li>
           ))}
