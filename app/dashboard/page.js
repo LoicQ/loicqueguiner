@@ -429,9 +429,8 @@ const styles = {
   },
   recentRow: {
     display: 'flex',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
-    gap: '0.5rem',
+    flexDirection: 'column',
+    gap: '0.2rem',
     fontSize: '0.9rem',
     borderBottom: '1px solid #d8f3dc',
     paddingBottom: '0.5rem',
