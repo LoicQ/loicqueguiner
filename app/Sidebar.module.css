@@ -18,7 +18,23 @@
 .nav {
   display: flex;
   flex-direction: column;
+  gap: 1.5rem;
+}
+
+.navSection {
+  display: flex;
+  flex-direction: column;
   gap: 0.75rem;
+}
+
+.sectionTitle {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #E8ECE8;
+  opacity: 0.5;
+  margin: 0;
 }
 
 .navLink {
@@ -30,4 +46,81 @@
 .navLink:hover {
   opacity: 1;
   text-decoration: underline;
+}
+
+/* Mobile-only elements, hidden on desktop */
+.topbar,
+.backdrop,
+.mobileNav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #16261C;
+    color: #E8ECE8;
+    padding: 1rem 1.25rem;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+
+  .topbar .siteName {
+    margin: 0;
+  }
+
+  .hamburgerButton {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 1.5rem;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 30;
+  }
+
+  .backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .mobileNav {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 220px;
+    max-width: 80vw;
+    background: #16261C;
+    color: #E8ECE8;
+    padding: 1.5rem 1.25rem;
+    box-sizing: border-box;
+    overflow-y: auto;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    z-index: 40;
+  }
+
+  .mobileNav.open {
+    transform: translateX(0);
+  }
 }

@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import styles from "./layout.module.css";
 import Sidebar from "./Sidebar";
 
 const geistSans = Geist({
@@ -21,9 +22,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
-        <div style={{ display: "flex", minHeight: "100vh" }}>
+        <div className={styles.appShell}>
           <Sidebar />
-          <div style={{ flex: 1, minWidth: 0 }}>{children}</div>
+          <div className={styles.main}>{children}</div>
         </div>
       </body>
     </html>
