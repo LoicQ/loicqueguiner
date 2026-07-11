@@ -44,8 +44,9 @@ async function getBirds() {
 // ---------------------------------------------------------------------------
 
 const CANONICAL_CATEGORIES = [
-  'Passerine', 'Raptor', 'Wader', 'Wildfowl', 'Seabird',
-  'Gamebird', 'Pigeon / Dove', 'Owl', 'Woodpecker', 'Hummingbird', 'Other',
+  'Passerine', 'Raptor', 'Vulture', 'Shorebird', 'Heron/Egret/Ibis',
+  'Rail/Gallinule', 'Wildfowl', 'Seabird', 'Gamebird', 'Pigeon / Dove',
+  'Owl', 'Kingfisher', 'Woodpecker', 'Hummingbird', 'Other',
 ];
 
 const CATEGORY_HUES = [

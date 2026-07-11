@@ -96,8 +96,9 @@ function PasswordGate({ onUnlock }) {
 
 // Dropdown options – update these lists if your DB uses different values.
 const CATEGORY_OPTIONS = [
-  'Passerine', 'Raptor', 'Wader', 'Wildfowl', 'Seabird',
-  'Gamebird', 'Pigeon / Dove', 'Owl', 'Woodpecker', 'Hummingbird', 'Other',
+  'Passerine', 'Raptor', 'Vulture', 'Shorebird', 'Heron/Egret/Ibis',
+  'Rail/Gallinule', 'Wildfowl', 'Seabird', 'Gamebird', 'Pigeon / Dove',
+  'Owl', 'Kingfisher', 'Woodpecker', 'Hummingbird', 'Other',
 ];
 
 const RARITY_OPTIONS = [
