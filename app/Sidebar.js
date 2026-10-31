@@ -6,7 +6,7 @@ import styles from './Sidebar.module.css';
 
 const NAV_SECTIONS = [
   {
-    title: 'Birding',
+    title: null,
     links: [
       { href: '/dashboard', label: 'Dashboard' },
       { href: '/', label: 'Compendium' },
@@ -21,18 +21,14 @@ export default function Sidebar() {
   const close = () => setIsOpen(false);
 
   return (
-    <>
-      <aside className={styles.sidebar}>
-        <p className={styles.siteName}>Bird Compendium</p>
-        <nav className={styles.nav}>
-          {NAV_SECTIONS.map((section) => (
-            <NavSection key={section.title} title={section.title} links={section.links} />
-          ))}
-        </nav>
-      </aside>
+    <header className={styles.header}>
+      <div className={styles.headerTop}>
+        <p className={styles.siteName}>
+          Field notes <span className={styles.siteNameAccent}>— birds</span>
+        </p>
 
-      <header className={styles.topbar}>
-        <p className={styles.siteName}>Bird Compendium</p>
+        <p className={`${styles.location} mono`}>PLATTSBURGH, NY · 44.69°N</p>
+
         <button
           type="button"
           className={styles.hamburgerButton}
@@ -42,26 +38,18 @@ export default function Sidebar() {
         >
           ☰
         </button>
-      </header>
+      </div>
 
-      <div
-        className={`${styles.backdrop} ${isOpen ? styles.open : ''}`}
-        onClick={close}
-        aria-hidden="true"
-      />
-
-      <aside className={`${styles.mobileNav} ${isOpen ? styles.open : ''}`}>
-        <nav className={styles.nav}>
-          {NAV_SECTIONS.map((section) => (
-            <NavSection
-              key={section.title}
-              title={section.title}
-              links={section.links}
-              onLinkClick={close}
-            />
-          ))}
-        </nav>
-      </aside>
-    </>
+      <nav className={`${styles.nav} ${isOpen ? styles.navOpen : ''}`}>
+        {NAV_SECTIONS.map((section) => (
+          <NavSection
+            key={section.title ?? 'main'}
+            title={section.title}
+            links={section.links}
+            onLinkClick={close}
+          />
+        ))}
+      </nav>
+    </header>
   );
 }
